@@ -12,6 +12,7 @@ import gg.xp.xivsupport.events.state.combatstate.StatusEffectRepository;
 import gg.xp.xivsupport.events.triggers.marks.adv.MarkerSign;
 import gg.xp.xivsupport.events.triggers.marks.adv.SpecificAutoMarkRequest;
 import gg.xp.xivsupport.events.triggers.seq.SequentialTrigger;
+import gg.xp.xivsupport.events.triggers.seq.SequentialTriggerController;
 import gg.xp.xivsupport.events.triggers.seq.SqtTemplates;
 import gg.xp.xivsupport.models.XivCombatant;
 import gg.xp.xivsupport.models.XivPlayerCharacter;
@@ -23,8 +24,9 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-@CalloutRepo(name = "P8S", duty = KnownDuty.P8S)
+@CalloutRepo(name = "P8S Automarkers", duty = KnownDuty.P8S)
 public class P8SAutoMarkers extends AutoChildEventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(P8SAutoMarkers.class);
@@ -92,6 +94,51 @@ public class P8SAutoMarkers extends AutoChildEventHandler {
                         }
                     }
                 }
+            });
+
+    @AutoFeed
+    private final SequentialTrigger<BaseEvent> highConcept = SqtTemplates.multiInvocation(60_000, AbilityCastStart.class, acs -> acs.abilityIdMatches(31148),
+            this::hc1,
+            this::hc2);
+
+    // red
+    private static final int impAlpha = 0xD02;
+    // yellow
+    private static final int impBeta = 0xD03;
+    // orange
+    private static final int impGamma = 0xD04;
+    // green on red
+    private static final int perfAlpha = 0xD05;
+    // yellow on yellow
+    private static final int perfBeta = 0xD06;
+    // purple on orange
+    private static final int perfGamma = 0xD07;
+    // 'no' sign
+    private static final int inconceivable = 0xD08;
+    // red DNA
+    private static final int solosplice = 0xD11;
+    // yellow DNA
+    private static final int multisplice = 0xD12;
+    // blue DNA
+    private static final int supersplice = 0xD13;
+
+    private void hc1(AbilityCastStart e1, SequentialTriggerController<BaseEvent> s) {
+
+    }
+
+    private void hc2(AbilityCastStart e1, SequentialTriggerController<BaseEvent> s) {
+
+    }
+
+    @AutoFeed
+    private final SequentialTrigger<BaseEvent> dominion = SqtTemplates.sq(30_000, AbilityCastStart.class,
+            acs -> acs.abilityIdMatches(31193),
+            (e1, s) -> {
+                List<AbilityUsedEvent> hits = s.waitEventsQuickSuccession(4, AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31195) && aue.isFirstTarget(), Duration.ofMillis(100));
+                List<XivPlayerCharacter> hitPlayers = hits.stream()
+                        .filter(aue -> (aue.getTarget() instanceof XivPlayerCharacter))
+                        .map(aue -> (XivPlayerCharacter)aue.getTarget())
+                        .collect(Collectors.toList());
             });
 
     public BooleanSetting getUseAutoMarks() {

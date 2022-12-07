@@ -376,7 +376,6 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
 
                     //second towers appear
                     s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(inconceivable));
-                    s.accept(new ClearAutoMarkRequest());
 
                     s.accept(new SpecificAutoMarkRequest(longA.get(), MarkerSign.BIND1));
                     s.accept(new SpecificAutoMarkRequest(longB.get(), MarkerSign.BIND2));

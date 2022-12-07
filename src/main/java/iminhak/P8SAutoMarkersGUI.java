@@ -52,10 +52,11 @@ public class P8SAutoMarkersGUI implements DutyPluginTab {
         JCheckBox useHC2 = new BooleanSettingGui(p8s.getUseHC2(), "(NYI) Use HC1 markers").getComponent();
         JCheckBox useDominion = new BooleanSettingGui(p8s.getUseDominion(), "(NYI) Use Dominion markers").getComponent();
         ReadOnlyText text = new ReadOnlyText("""
-                Limitless Desolation markers will mark DPS players with Attack 1-4 markers and support players with bind 1-3 for the first third baits, then a square for the fourth.
+                Limitless Desolation markers will mark DPS players with Attack 1-4 markers and support players with Bind 1-3 for the first third baits, then a square for the fourth.
                 - Inverse roles will instead put the Attack markers on supports
                 
-                HC1 markers will -
+                HC1 markers will mark the players who need to mix Attack 1 and 2 while also marking the Supersplice and Multisplice players with Bind 1-3 to indicate which debuff they must soak (Alpha 1, Beta 2, Gamma 3).
+                For the second set of towers two players will be marked as Attack 1 & 2 and the other two will be marked as Ignore 1 & 2
                 
                 HC2 markers will -
                 

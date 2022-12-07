@@ -18,6 +18,7 @@ import gg.xp.xivsupport.events.misc.pulls.PullStartedEvent;
 import gg.xp.xivsupport.events.state.XivState;
 import gg.xp.xivsupport.events.state.combatstate.StatusEffectRepository;
 import gg.xp.xivsupport.events.triggers.duties.Pandamonium.P8S2;
+import gg.xp.xivsupport.events.triggers.easytriggers.actions.ClearAllMarksAction;
 import gg.xp.xivsupport.events.triggers.marks.ClearAutoMarkRequest;
 import gg.xp.xivsupport.events.triggers.marks.adv.MarkerSign;
 import gg.xp.xivsupport.events.triggers.marks.adv.SpecificAutoMarkRequest;
@@ -34,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -327,6 +329,67 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
 
     private void hc2(AbilityCastStart e1, SequentialTriggerController<BaseEvent> s) {
         if(getUseAutoMarks().get() && getUseHC2().get()) {
+            List<BuffApplied> buffs = s.waitEvents(8, BuffApplied.class, ba -> ba.buffIdMatches(impAlpha, impBeta, impGamma, solosplice, multisplice));
+            //make sure its only players
+            buffs = buffs.stream().filter(ba -> {
+                XivCombatant target = ba.getTarget();
+                return (target instanceof XivPlayerCharacter);
+            }).collect(Collectors.toList());
+            Optional<XivPlayerCharacter> shortA = buffs.stream().filter(ba -> ba.buffIdMatches(impAlpha) && ba.getInitialDuration().toSeconds() < 15).map(ba -> (XivPlayerCharacter)ba.getTarget()).findAny();
+            Optional<XivPlayerCharacter> shortB = buffs.stream().filter(ba -> ba.buffIdMatches(impBeta) && ba.getInitialDuration().toSeconds() < 15).map(ba -> (XivPlayerCharacter)ba.getTarget()).findAny();
+            Optional<XivPlayerCharacter> shortG = buffs.stream().filter(ba -> ba.buffIdMatches(impGamma) && ba.getInitialDuration().toSeconds() < 15).map(ba -> (XivPlayerCharacter)ba.getTarget()).findAny();
+            Optional<XivPlayerCharacter> longA = buffs.stream().filter(ba -> ba.buffIdMatches(impAlpha) && ba.getInitialDuration().toSeconds() > 15).map(ba -> (XivPlayerCharacter)ba.getTarget()).findAny();
+            Optional<XivPlayerCharacter> longB = buffs.stream().filter(ba -> ba.buffIdMatches(impBeta) && ba.getInitialDuration().toSeconds() > 15).map(ba -> (XivPlayerCharacter)ba.getTarget()).findAny();
+            Optional<XivPlayerCharacter> longG = buffs.stream().filter(ba -> ba.buffIdMatches(impGamma) && ba.getInitialDuration().toSeconds() > 15).map(ba -> (XivPlayerCharacter)ba.getTarget()).findAny();
+            List<XivPlayerCharacter> ifrits = new ArrayList<>(getState().getPartyList());
+            if(shortA.isPresent() && shortB.isPresent() && shortG.isPresent() && longA.isPresent() && longB.isPresent() && longG.isPresent()) {
+                buffs.stream().filter(ba -> ba.getTarget() instanceof XivPlayerCharacter).map(ba -> (XivPlayerCharacter) ba.getTarget()).forEach(ifrits::remove);
+                if(ifrits.size() == 2) {
+                    s.accept(new SpecificAutoMarkRequest(ifrits.get(1), MarkerSign.IGNORE1));
+                    s.accept(new SpecificAutoMarkRequest(ifrits.get(2), MarkerSign.IGNORE2));
+
+                    s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(inconceivable));
+
+                    List<MapEffectEvent> mapEffects = s.waitEvents(2, MapEffectEvent.class, P8SAutoMarkers::towerMapEffect);
+                    @Nullable TowerColor towerColor = towerColor(mapEffects);
+                    log.info("HC2AM: Tower Color 1: {}", towerColor);
+
+                    XivPlayerCharacter skipped = null;
+                    if (towerColor == TowerColor.Green) {
+                        s.accept(new SpecificAutoMarkRequest(shortA.get(), MarkerSign.ATTACK1));
+                        s.accept(new SpecificAutoMarkRequest(shortB.get(), MarkerSign.ATTACK2));
+                        //Gamma skip
+                        skipped = shortG.get();
+                    } else if(towerColor == TowerColor.Purple) {
+                        s.accept(new SpecificAutoMarkRequest(shortB.get(), MarkerSign.ATTACK1));
+                        s.accept(new SpecificAutoMarkRequest(shortG.get(), MarkerSign.ATTACK2));
+                        //Alpha Skip
+                        skipped = shortA.get();
+                    } else if(towerColor == TowerColor.Blue) {
+                        s.accept(new SpecificAutoMarkRequest(shortA.get(), MarkerSign.ATTACK1));
+                        s.accept(new SpecificAutoMarkRequest(shortG.get(), MarkerSign.ATTACK2));
+                        //Beta Skip
+                        skipped = shortB.get();
+                    } else {
+                        log.info("HC1AM: Unknown tower color: {}", towerColor);
+                    }
+
+                    //second towers appear
+                    s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(inconceivable));
+                    s.accept(new ClearAutoMarkRequest());
+
+                    s.accept(new SpecificAutoMarkRequest(longA.get(), MarkerSign.BIND1));
+                    s.accept(new SpecificAutoMarkRequest(longB.get(), MarkerSign.BIND2));
+                    s.accept(new SpecificAutoMarkRequest(longG.get(), MarkerSign.SQUARE));
+                    s.accept(new SpecificAutoMarkRequest(skipped, MarkerSign.TRIANGLE));
+
+                    s.waitEvent(AbilityCastStart.class, acs -> acs.abilityIdMatches(0x7AA0));
+                    s.accept(new ClearAutoMarkRequest());
+                }
+            } else {
+                log.info("HC1AM: Something is missing! {}, {}, {}, {}, {}, {}", shortA.isPresent(), shortB.isPresent(), shortG.isPresent(), longA.isPresent(), longB.isPresent(), longG.isPresent());
+            }
+
         }
 
     }

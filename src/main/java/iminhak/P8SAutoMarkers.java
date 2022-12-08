@@ -18,6 +18,7 @@ import gg.xp.xivsupport.events.misc.pulls.PullStartedEvent;
 import gg.xp.xivsupport.events.state.XivState;
 import gg.xp.xivsupport.events.state.combatstate.StatusEffectRepository;
 import gg.xp.xivsupport.events.triggers.duties.Pandamonium.P8S2;
+import gg.xp.xivsupport.events.triggers.duties.Pandamonium.P8S2DominionPrio;
 import gg.xp.xivsupport.events.triggers.easytriggers.actions.ClearAllMarksAction;
 import gg.xp.xivsupport.events.triggers.marks.ClearAutoMarkRequest;
 import gg.xp.xivsupport.events.triggers.marks.adv.MarkerSign;
@@ -56,9 +57,10 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
 
     private final BooleanSetting useLD;
 
-    public P8SAutoMarkers(XivState state, StatusEffectRepository buffs, PersistenceProvider pers) {
+    public P8SAutoMarkers(XivState state, StatusEffectRepository buffs, PersistenceProvider pers, P8S2DominionPrio dominionPrio) {
         this.state = state;
         this.buffs = buffs;
+        this.dominionPrio = dominionPrio;
         this.useAutoMarks = new BooleanSetting(pers, "triggers.p8s.use-auto-markers", false);
 
         this.useLimitlessDesolation = new BooleanSetting(pers, "triggers.p8s.use-dominion", false);
@@ -73,6 +75,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
 
     private final XivState state;
     private final StatusEffectRepository buffs;
+    private final P8S2DominionPrio dominionPrio;
 
     private XivState getState() {
         return this.state;
@@ -80,6 +83,10 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
 
     private StatusEffectRepository getBuffs() {
         return this.buffs;
+    }
+
+    private P8S2DominionPrio getDominionPrio() {
+        return this.dominionPrio;
     }
 
     @Override
@@ -398,10 +405,39 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
             acs -> acs.abilityIdMatches(31193),
             (e1, s) -> {
                 List<AbilityUsedEvent> hits = s.waitEventsQuickSuccession(4, AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31195) && aue.isFirstTarget(), Duration.ofMillis(100));
-                List<XivPlayerCharacter> hitPlayers = hits.stream()
+                List<XivPlayerCharacter> firstSet = new ArrayList<>(getState().getPartyList());
+                List<XivPlayerCharacter> secondSet = hits.stream()
                         .filter(aue -> (aue.getTarget() instanceof XivPlayerCharacter))
                         .map(aue -> (XivPlayerCharacter)aue.getTarget())
                         .collect(Collectors.toList());
+                firstSet.removeAll(secondSet);
+
+                firstSet.sort(getDominionPrio().getSortSetting().getPlayerJailSortComparator());
+                secondSet.sort(getDominionPrio().getSortSetting().getPlayerJailSortComparator());
+
+                if(firstSet.size() == 4 && secondSet.size() == 4) {
+                    s.accept(new SpecificAutoMarkRequest(firstSet.get(0), MarkerSign.ATTACK1));
+                    s.accept(new SpecificAutoMarkRequest(firstSet.get(1), MarkerSign.ATTACK2));
+                    s.accept(new SpecificAutoMarkRequest(firstSet.get(2), MarkerSign.ATTACK3));
+                    s.accept(new SpecificAutoMarkRequest(firstSet.get(3), MarkerSign.ATTACK4));
+                    s.waitMs(100);
+                    s.accept(new SpecificAutoMarkRequest(secondSet.get(0), MarkerSign.BIND1));
+                    s.accept(new SpecificAutoMarkRequest(secondSet.get(1), MarkerSign.BIND2));
+                    s.accept(new SpecificAutoMarkRequest(secondSet.get(2), MarkerSign.BIND3));
+                    s.accept(new SpecificAutoMarkRequest(secondSet.get(3), MarkerSign.SQUARE));
+
+                    s.waitEvent(AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31196));
+
+                    s.accept(new SpecificAutoMarkRequest(secondSet.get(0), MarkerSign.ATTACK1));
+                    s.accept(new SpecificAutoMarkRequest(secondSet.get(1), MarkerSign.ATTACK2));
+                    s.accept(new SpecificAutoMarkRequest(secondSet.get(2), MarkerSign.ATTACK3));
+                    s.accept(new SpecificAutoMarkRequest(secondSet.get(3), MarkerSign.ATTACK4));
+
+                    s.waitEvent(AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31196));
+                    s.accept(new ClearAutoMarkRequest());
+                } else {
+                    log.info("DominionAM: Error in first/second set sizes: {} and {}", firstSet.size(), secondSet.size());
+                }
             });
 
     public BooleanSetting getUseAutoMarks() {

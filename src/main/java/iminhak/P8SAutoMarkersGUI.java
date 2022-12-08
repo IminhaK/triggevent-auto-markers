@@ -50,7 +50,7 @@ public class P8SAutoMarkersGUI implements DutyPluginTab {
 
         JCheckBox useHC1 = new BooleanSettingGui(p8s.getUseHC1(), "Use HC1 markers").getComponent();
         JCheckBox useHC2 = new BooleanSettingGui(p8s.getUseHC2(), "Use HC2 markers").getComponent();
-        JCheckBox useDominion = new BooleanSettingGui(p8s.getUseDominion(), "(NYI) Use Dominion markers").getComponent();
+        JCheckBox useDominion = new BooleanSettingGui(p8s.getUseDominion(), "Use Dominion markers").getComponent();
         ReadOnlyText text = new ReadOnlyText("""
                 Limitless Desolation markers will mark DPS players with Attack 1-4 markers and support players with Bind 1-3 for the first third baits, then a square for the fourth.
                 - Inverse roles will instead put the Attack markers on supports
@@ -60,7 +60,7 @@ public class P8SAutoMarkersGUI implements DutyPluginTab {
                 
                 HC2 markers will mark the no debuff players with Ignore 1 and 2, then the first mixing players at Attack 1 and 2. After second debuffs it will mark long Alpha and Beta with Bind 1 and 2, and Gamma with Square and the unused short with Triangle
                 
-                Dominion markers will mark players soaking the first set of towers as Attack 1-4, and then swap the markers to the second set of players after the first set of towers goes off.
+                Dominion markers will mark players soaking the first set of towers as Attack 1-4 and mark the second set of players as Bind 1-3 and Square, and then swap the Attack markers to the second set of players after the first set of towers goes off.
                 Dominion markers use the priority from base Triggevent's Dominion prio, click below to be taken there:
                 """);
         JButton domPrio = new JButton("Dominion Priority");

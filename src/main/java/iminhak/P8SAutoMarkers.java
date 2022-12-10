@@ -118,7 +118,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
                             return (target instanceof XivPlayerCharacter pc) && !pc.getJob().isDps();
                         }).findAny();
 
-                        if(dps.isPresent()) {
+                        if(dps.isPresent() && sup.isPresent()) {
                             XivPlayerCharacter dpsPlayer = (XivPlayerCharacter) dps.get().getTarget();
                             XivPlayerCharacter supPlayer = (XivPlayerCharacter) sup.get().getTarget();
                             s.accept(new SpecificAutoMarkRequest(dpsPlayer, switch (i) {
@@ -135,6 +135,8 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
                                 case 4 -> inverse ? MarkerSign.ATTACK4 : MarkerSign.SQUARE;
                                 default -> MarkerSign.IGNORE_NEXT; //Uh oh stinky
                             }));
+                        } else {
+                            log.info("LDAM: Missing target: {}, {}", dps, sup);
                         }
                     }
                 }
@@ -224,7 +226,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
             Optional<XivPlayerCharacter> superspliceP = buffs.stream().filter(ba -> ba.buffIdMatches(supersplice)).map(ba -> (XivPlayerCharacter)ba.getTarget()).findAny();
             Optional<XivPlayerCharacter> multispliceP = buffs.stream().filter(ba -> ba.buffIdMatches(multisplice)).map(ba -> (XivPlayerCharacter)ba.getTarget()).findAny();
 
-            //marks first debuffs going off
+            //marks first defamations going off
             s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(inconceivable));
             //markers useless if no mapeffects, so just let it fail if it cant find them
             List<MapEffectEvent> mapEffects = s.waitEvents(2, MapEffectEvent.class, P8SAutoMarkers::towerMapEffect);
@@ -257,7 +259,10 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
                     log.info("HC1AM: Unknown tower color: {}", towerColor);
                 }
 
-                //second towers appear
+                //first players mix
+                s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(inconceivable));
+                s.waitMs(500);
+                //second defamation
                 s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(inconceivable));
                 s.accept(new ClearAutoMarkRequest());
 
@@ -267,58 +272,67 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
 
                 if(towerColor2 == TowerColor.Green) {
                     //A and B mix
-                    if(skipped.equals("Gamma")) {
-                        //Stacks are A and B
-                        s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK1));
-                        s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK2));
-                    } else if(skipped.equals("Alpha")) {
-                        //Stacks are B and G
-                        s.accept(new SpecificAutoMarkRequest(shortA.get(), MarkerSign.ATTACK1));
-                        s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK2));
-                    } else if(skipped.equals("Beta")) {
-                        //Stacks are A and G
-                        s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK1));
-                        s.accept(new SpecificAutoMarkRequest(shortB.get(), MarkerSign.ATTACK2));
-                    } else {
-                        log.info("HC1AM: Unknown skipped: {}", skipped);
+                    switch (skipped) {
+                        case "Gamma" -> {
+                            //Stacks are A and B
+                            s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK1));
+                            s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK2));
+                        }
+                        case "Alpha" -> {
+                            //Stacks are B and G
+                            s.accept(new SpecificAutoMarkRequest(shortA.get(), MarkerSign.ATTACK1));
+                            s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK2));
+                        }
+                        case "Beta" -> {
+                            //Stacks are A and G
+                            s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK1));
+                            s.accept(new SpecificAutoMarkRequest(shortB.get(), MarkerSign.ATTACK2));
+                        }
+                        default -> log.info("HC1AM: Unknown skipped: {}", skipped);
                     }
                     s.accept(new SpecificAutoMarkRequest(longA.get(), MarkerSign.IGNORE1));
                     s.accept(new SpecificAutoMarkRequest(longB.get(), MarkerSign.IGNORE2));
                 } else if(towerColor2 == TowerColor.Purple) {
                     //B and G mix
-                    if(skipped.equals("Gamma")) {
-                        //Stacks are A and B
-                        s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK1));
-                        s.accept(new SpecificAutoMarkRequest(shortG.get(), MarkerSign.ATTACK2));
-                    } else if(skipped.equals("Alpha")) {
-                        //Stacks are B and G
-                        s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK1));
-                        s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK2));
-                    } else if(skipped.equals("Beta")) {
-                        //Stacks are A and G
-                        s.accept(new SpecificAutoMarkRequest(shortB.get(), MarkerSign.ATTACK1));
-                        s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK2));
-                    } else {
-                        log.info("HC1AM: Unknown skipped: {}", skipped);
+                    switch (skipped) {
+                        case "Gamma" -> {
+                            //Stacks are A and B
+                            s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK1));
+                            s.accept(new SpecificAutoMarkRequest(shortG.get(), MarkerSign.ATTACK2));
+                        }
+                        case "Alpha" -> {
+                            //Stacks are B and G
+                            s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK1));
+                            s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK2));
+                        }
+                        case "Beta" -> {
+                            //Stacks are A and G
+                            s.accept(new SpecificAutoMarkRequest(shortB.get(), MarkerSign.ATTACK1));
+                            s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK2));
+                        }
+                        default -> log.info("HC1AM: Unknown skipped: {}", skipped);
                     }
                     s.accept(new SpecificAutoMarkRequest(longB.get(), MarkerSign.IGNORE1));
                     s.accept(new SpecificAutoMarkRequest(longG.get(), MarkerSign.IGNORE2));
                 } else if(towerColor2 == TowerColor.Blue) {
                     //A and G mix
-                    if(skipped.equals("Gamma")) {
-                        //Stacks are A and B
-                        s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK1));
-                        s.accept(new SpecificAutoMarkRequest(shortG.get(), MarkerSign.ATTACK2));
-                    } else if(skipped.equals("Alpha")) {
-                        //Stacks are B and G
-                        s.accept(new SpecificAutoMarkRequest(shortA.get(), MarkerSign.ATTACK1));
-                        s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK2));
-                    } else if(skipped.equals("Beta")) {
-                        //Stacks are A and G
-                        s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK1));
-                        s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK2));
-                    } else {
-                        log.info("HC1AM: Unknown skipped: {}", skipped);
+                    switch (skipped) {
+                        case "Gamma" -> {
+                            //Stacks are A and B
+                            s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK1));
+                            s.accept(new SpecificAutoMarkRequest(shortG.get(), MarkerSign.ATTACK2));
+                        }
+                        case "Alpha" -> {
+                            //Stacks are B and G
+                            s.accept(new SpecificAutoMarkRequest(shortA.get(), MarkerSign.ATTACK1));
+                            s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK2));
+                        }
+                        case "Beta" -> {
+                            //Stacks are A and G
+                            s.accept(new SpecificAutoMarkRequest(multispliceP.get(), MarkerSign.ATTACK1));
+                            s.accept(new SpecificAutoMarkRequest(superspliceP.get(), MarkerSign.ATTACK2));
+                        }
+                        default -> log.info("HC1AM: Unknown skipped: {}", skipped);
                     }
                     s.accept(new SpecificAutoMarkRequest(longA.get(), MarkerSign.IGNORE1));
                     s.accept(new SpecificAutoMarkRequest(longG.get(), MarkerSign.IGNORE2));
@@ -330,7 +344,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
             }
         }
 
-        s.waitEvent(AbilityCastStart.class, acs -> acs.abilityIdMatches(31199));
+        s.waitEvent(AbilityCastStart.class, acs -> acs.abilityIdMatches(0x7A8E)); //Deconceptualize
         s.accept(new ClearAutoMarkRequest());
     }
 
@@ -352,8 +366,8 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
             if(shortA.isPresent() && shortB.isPresent() && shortG.isPresent() && longA.isPresent() && longB.isPresent() && longG.isPresent()) {
                 buffs.stream().filter(ba -> ba.getTarget() instanceof XivPlayerCharacter).map(ba -> (XivPlayerCharacter) ba.getTarget()).forEach(ifrits::remove);
                 if(ifrits.size() == 2) {
-                    s.accept(new SpecificAutoMarkRequest(ifrits.get(1), MarkerSign.IGNORE1));
-                    s.accept(new SpecificAutoMarkRequest(ifrits.get(2), MarkerSign.IGNORE2));
+                    s.accept(new SpecificAutoMarkRequest(ifrits.get(0), MarkerSign.IGNORE1));
+                    s.accept(new SpecificAutoMarkRequest(ifrits.get(1), MarkerSign.IGNORE2));
 
                     s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(inconceivable));
 
@@ -381,7 +395,10 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
                         log.info("HC1AM: Unknown tower color: {}", towerColor);
                     }
 
-                    //second towers appear
+                    //first players mix
+                    s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(inconceivable));
+                    s.waitMs(500);
+                    //second defamation
                     s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(inconceivable));
 
                     s.accept(new SpecificAutoMarkRequest(longA.get(), MarkerSign.BIND1));
@@ -389,7 +406,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
                     s.accept(new SpecificAutoMarkRequest(longG.get(), MarkerSign.SQUARE));
                     s.accept(new SpecificAutoMarkRequest(skipped, MarkerSign.TRIANGLE));
 
-                    s.waitEvent(AbilityCastStart.class, acs -> acs.abilityIdMatches(0x7AA0));
+                    s.waitEvent(AbilityCastStart.class, acs -> acs.abilityIdMatches(0x7A8E)); //Deconceptualize
                     s.accept(new ClearAutoMarkRequest());
                 }
             } else {
@@ -404,39 +421,41 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
     private final SequentialTrigger<BaseEvent> dominion = SqtTemplates.sq(30_000, AbilityCastStart.class,
             acs -> acs.abilityIdMatches(31193),
             (e1, s) -> {
-                List<AbilityUsedEvent> hits = s.waitEventsQuickSuccession(4, AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31195) && aue.isFirstTarget(), Duration.ofMillis(100));
-                List<XivPlayerCharacter> firstSet = new ArrayList<>(getState().getPartyList());
-                List<XivPlayerCharacter> secondSet = hits.stream()
-                        .filter(aue -> (aue.getTarget() instanceof XivPlayerCharacter))
-                        .map(aue -> (XivPlayerCharacter)aue.getTarget())
-                        .collect(Collectors.toList());
-                firstSet.removeAll(secondSet);
+                if (getUseAutoMarks().get() && getUseDominion().get()) {
+                    List<AbilityUsedEvent> hits = s.waitEventsQuickSuccession(4, AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31195) && aue.isFirstTarget(), Duration.ofMillis(100));
+                    List<XivPlayerCharacter> firstSet = new ArrayList<>(getState().getPartyList());
+                    List<XivPlayerCharacter> secondSet = hits.stream()
+                            .filter(aue -> (aue.getTarget() instanceof XivPlayerCharacter))
+                            .map(aue -> (XivPlayerCharacter) aue.getTarget())
+                            .collect(Collectors.toList());
+                    firstSet.removeAll(secondSet);
 
-                firstSet.sort(getDominionPrio().getSortSetting().getPlayerJailSortComparator());
-                secondSet.sort(getDominionPrio().getSortSetting().getPlayerJailSortComparator());
+                    firstSet.sort(getDominionPrio().getSortSetting().getPlayerJailSortComparator());
+                    secondSet.sort(getDominionPrio().getSortSetting().getPlayerJailSortComparator());
 
-                if(firstSet.size() == 4 && secondSet.size() == 4) {
-                    s.accept(new SpecificAutoMarkRequest(firstSet.get(0), MarkerSign.ATTACK1));
-                    s.accept(new SpecificAutoMarkRequest(firstSet.get(1), MarkerSign.ATTACK2));
-                    s.accept(new SpecificAutoMarkRequest(firstSet.get(2), MarkerSign.ATTACK3));
-                    s.accept(new SpecificAutoMarkRequest(firstSet.get(3), MarkerSign.ATTACK4));
-                    s.waitMs(100);
-                    s.accept(new SpecificAutoMarkRequest(secondSet.get(0), MarkerSign.BIND1));
-                    s.accept(new SpecificAutoMarkRequest(secondSet.get(1), MarkerSign.BIND2));
-                    s.accept(new SpecificAutoMarkRequest(secondSet.get(2), MarkerSign.BIND3));
-                    s.accept(new SpecificAutoMarkRequest(secondSet.get(3), MarkerSign.SQUARE));
+                    if (firstSet.size() == 4 && secondSet.size() == 4) {
+                        s.accept(new SpecificAutoMarkRequest(firstSet.get(0), MarkerSign.ATTACK1));
+                        s.accept(new SpecificAutoMarkRequest(firstSet.get(1), MarkerSign.ATTACK2));
+                        s.accept(new SpecificAutoMarkRequest(firstSet.get(2), MarkerSign.ATTACK3));
+                        s.accept(new SpecificAutoMarkRequest(firstSet.get(3), MarkerSign.ATTACK4));
+                        s.waitMs(100);
+                        s.accept(new SpecificAutoMarkRequest(secondSet.get(0), MarkerSign.BIND1));
+                        s.accept(new SpecificAutoMarkRequest(secondSet.get(1), MarkerSign.BIND2));
+                        s.accept(new SpecificAutoMarkRequest(secondSet.get(2), MarkerSign.BIND3));
+                        s.accept(new SpecificAutoMarkRequest(secondSet.get(3), MarkerSign.SQUARE));
 
-                    s.waitEvent(AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31196));
+                        s.waitEvent(AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31196));
 
-                    s.accept(new SpecificAutoMarkRequest(secondSet.get(0), MarkerSign.ATTACK1));
-                    s.accept(new SpecificAutoMarkRequest(secondSet.get(1), MarkerSign.ATTACK2));
-                    s.accept(new SpecificAutoMarkRequest(secondSet.get(2), MarkerSign.ATTACK3));
-                    s.accept(new SpecificAutoMarkRequest(secondSet.get(3), MarkerSign.ATTACK4));
+                        s.accept(new SpecificAutoMarkRequest(secondSet.get(0), MarkerSign.ATTACK1));
+                        s.accept(new SpecificAutoMarkRequest(secondSet.get(1), MarkerSign.ATTACK2));
+                        s.accept(new SpecificAutoMarkRequest(secondSet.get(2), MarkerSign.ATTACK3));
+                        s.accept(new SpecificAutoMarkRequest(secondSet.get(3), MarkerSign.ATTACK4));
 
-                    s.waitEvent(AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31196));
-                    s.accept(new ClearAutoMarkRequest());
-                } else {
-                    log.info("DominionAM: Error in first/second set sizes: {} and {}", firstSet.size(), secondSet.size());
+                        s.waitEvent(AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31196));
+                        s.accept(new ClearAutoMarkRequest());
+                    } else {
+                        log.info("DominionAM: Error in first/second set sizes: {} and {}", firstSet.size(), secondSet.size());
+                    }
                 }
             });
 

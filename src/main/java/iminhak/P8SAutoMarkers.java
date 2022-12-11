@@ -261,14 +261,14 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
 
                 //first players mix
                 s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(inconceivable));
-                s.waitMs(500);
+                s.waitMs(5_000);
+                s.accept(new ClearAutoMarkRequest());
                 //second defamation
                 s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(inconceivable));
-                s.accept(new ClearAutoMarkRequest());
 
                 TowerColor towerColor2;
-                mapEffects = s.waitEvents(2, MapEffectEvent.class, P8SAutoMarkers::towerMapEffect);
-                towerColor2 = towerColor(mapEffects);
+                List<MapEffectEvent> mapEffects2 = s.waitEvents(2, MapEffectEvent.class, P8SAutoMarkers::towerMapEffect);
+                towerColor2 = towerColor(mapEffects2);
 
                 if(towerColor2 == TowerColor.Green) {
                     //A and B mix
@@ -406,7 +406,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
                     s.accept(new SpecificAutoMarkRequest(longG.get(), MarkerSign.SQUARE));
                     s.accept(new SpecificAutoMarkRequest(skipped, MarkerSign.TRIANGLE));
 
-                    s.waitEvent(AbilityCastStart.class, acs -> acs.abilityIdMatches(0x7A8E)); //Deconceptualize
+                    s.waitEvent(AbilityCastStart.class, acs -> acs.abilityIdMatches(0x7AA0)); //Ego death
                     s.accept(new ClearAutoMarkRequest());
                 }
             } else {

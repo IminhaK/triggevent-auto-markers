@@ -1,4 +1,4 @@
-package iminhak;
+package iminhak.abyssos;
 
 import gg.xp.reevent.scan.ScanMe;
 import gg.xp.xivdata.data.duties.KnownDuty;
@@ -37,7 +37,7 @@ public class P8SAutoMarkersGUI implements DutyPluginTab {
     public Component getTabContents() {
         TitleBorderFullsizePanel outer = new TitleBorderFullsizePanel("P8S Automarkers");
         outer.setLayout(new BorderLayout());
-        JCheckBox p8markers = new BooleanSettingGui(p8s.getUseAutoMarks(), "P8S Automarkers").getComponent();
+        JCheckBox p8markers = new BooleanSettingGui(p8s.getUseAutomarks(), "P8S Automarkers").getComponent();
         outer.add(p8markers, BorderLayout.NORTH);
         GridBagConstraints c = new GridBagConstraints(0, 0, 2, 1, 1, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0);
 
@@ -84,7 +84,7 @@ public class P8SAutoMarkersGUI implements DutyPluginTab {
         c.weighty = 1;
         inner.add(domPrio, c);
 
-        p8s.getUseAutoMarks().addAndRunListener(this::checkVis);
+        p8s.getUseAutomarks().addAndRunListener(this::checkVis);
         p8s.getUseLimitlessDesolation().addAndRunListener(this::checkLDVis);
         outer.add(inner, BorderLayout.CENTER);
         return outer;
@@ -96,7 +96,7 @@ public class P8SAutoMarkersGUI implements DutyPluginTab {
     }
 
     private void checkVis() {
-        boolean enabled = p8s.getUseAutoMarks().get();
+        boolean enabled = p8s.getUseAutomarks().get();
         inner.setVisible(enabled);
     }
 

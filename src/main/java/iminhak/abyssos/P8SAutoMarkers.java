@@ -1,4 +1,4 @@
-package iminhak;
+package iminhak.abyssos;
 
 import gg.xp.reevent.events.BaseEvent;
 import gg.xp.reevent.events.EventContext;
@@ -12,21 +12,16 @@ import gg.xp.xivsupport.events.actlines.events.AbilityCastStart;
 import gg.xp.xivsupport.events.actlines.events.AbilityUsedEvent;
 import gg.xp.xivsupport.events.actlines.events.BuffApplied;
 import gg.xp.xivsupport.events.actlines.events.MapEffectEvent;
-import gg.xp.xivsupport.events.actlines.events.actorcontrol.DutyCommenceEvent;
 import gg.xp.xivsupport.events.actlines.events.actorcontrol.DutyRecommenceEvent;
-import gg.xp.xivsupport.events.misc.pulls.PullStartedEvent;
 import gg.xp.xivsupport.events.state.XivState;
 import gg.xp.xivsupport.events.state.combatstate.StatusEffectRepository;
-import gg.xp.xivsupport.events.triggers.duties.Pandamonium.P8S2;
 import gg.xp.xivsupport.events.triggers.duties.Pandamonium.P8S2DominionPrio;
-import gg.xp.xivsupport.events.triggers.easytriggers.actions.ClearAllMarksAction;
 import gg.xp.xivsupport.events.triggers.marks.ClearAutoMarkRequest;
 import gg.xp.xivsupport.events.triggers.marks.adv.MarkerSign;
 import gg.xp.xivsupport.events.triggers.marks.adv.SpecificAutoMarkRequest;
 import gg.xp.xivsupport.events.triggers.seq.SequentialTrigger;
 import gg.xp.xivsupport.events.triggers.seq.SequentialTriggerController;
 import gg.xp.xivsupport.events.triggers.seq.SqtTemplates;
-import gg.xp.xivsupport.gui.extra.DutyPluginTab;
 import gg.xp.xivsupport.models.XivCombatant;
 import gg.xp.xivsupport.models.XivPlayerCharacter;
 import gg.xp.xivsupport.persistence.PersistenceProvider;
@@ -103,7 +98,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
     private final SequentialTrigger<BaseEvent> limitlessDesolation = SqtTemplates.sq(60_000, AbilityCastStart.class,
             acs -> acs.abilityIdMatches(0x75ED),
             (e1, s) -> {
-                if(getUseAutoMarks().get() && getUseLimitlessDesolation().get()) {
+                if(getUseAutomarks().get() && getUseLimitlessDesolation().get()) {
                     log.info("Limitless Desolation markers are enabled");
                     for (int i = 1; i <= 4; i++) {
                         boolean inverse = getLDSupportAttack().get();
@@ -210,7 +205,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
     }
 
     private void hc1(AbilityCastStart e1, SequentialTriggerController<BaseEvent> s) {
-        if(getUseAutoMarks().get() && getUseHC1().get()) {
+        if(getUseAutomarks().get() && getUseHC1().get()) {
             List<BuffApplied> buffs = s.waitEvents(8, BuffApplied.class, ba -> ba.buffIdMatches(impAlpha, impBeta, impGamma, supersplice, multisplice));
             //make sure its only players
             buffs = buffs.stream().filter(ba -> {
@@ -349,7 +344,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
     }
 
     private void hc2(AbilityCastStart e1, SequentialTriggerController<BaseEvent> s) {
-        if(getUseAutoMarks().get() && getUseHC2().get()) {
+        if(getUseAutomarks().get() && getUseHC2().get()) {
             List<BuffApplied> buffs = s.waitEvents(8, BuffApplied.class, ba -> ba.buffIdMatches(impAlpha, impBeta, impGamma, solosplice, multisplice));
             //make sure its only players
             buffs = buffs.stream().filter(ba -> {
@@ -421,7 +416,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
     private final SequentialTrigger<BaseEvent> dominion = SqtTemplates.sq(30_000, AbilityCastStart.class,
             acs -> acs.abilityIdMatches(31193),
             (e1, s) -> {
-                if (getUseAutoMarks().get() && getUseDominion().get()) {
+                if (getUseAutomarks().get() && getUseDominion().get()) {
                     List<AbilityUsedEvent> hits = s.waitEventsQuickSuccession(4, AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31195) && aue.isFirstTarget(), Duration.ofMillis(100));
                     List<XivPlayerCharacter> firstSet = new ArrayList<>(getState().getPartyList());
                     List<XivPlayerCharacter> secondSet = hits.stream()
@@ -459,7 +454,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
                 }
             });
 
-    public BooleanSetting getUseAutoMarks() {
+    public BooleanSetting getUseAutomarks() {
         return useAutoMarks;
     }
 

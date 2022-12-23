@@ -12,29 +12,29 @@ import javax.swing.*;
 import java.awt.*;
 
 @ScanMe
-public class TBDUltimateGUI implements DutyPluginTab {
+public class OmegaProtocolGUI implements DutyPluginTab {
 
-    private final TBDUltimate tbdUltimate;
+    private final OmegaProtocol omegaProtocol;
     private JPanel inner;
     private JPanel innerDummyMechanic;
 
     private final GlobalUiRegistry reg;
 
-    public TBDUltimateGUI(TBDUltimate tbdUltimate, GlobalUiRegistry reg) {
-        this.tbdUltimate = tbdUltimate;
+    public OmegaProtocolGUI(OmegaProtocol omegaProtocol, GlobalUiRegistry reg) {
+        this.omegaProtocol = omegaProtocol;
         this.reg = reg;
     }
 
     @Override
     public String getTabName() {
-        return "Iminha's TBD Ultimate Automarkers";
+        return "Iminha's Omega Protocol Automarkers";
     }
 
     @Override
     public Component getTabContents() {
-        TitleBorderFullsizePanel outer = new TitleBorderFullsizePanel("TBD Ultimate Automarkers");
+        TitleBorderFullsizePanel outer = new TitleBorderFullsizePanel("Omega Protocol Automarkers");
         outer.setLayout(new BorderLayout());
-        JCheckBox TBDMarkers = new BooleanSettingGui(tbdUltimate.getUseAutomarks(), "TBD Ultimate Automarkers").getComponent();
+        JCheckBox TBDMarkers = new BooleanSettingGui(omegaProtocol.getUseAutomarks(), "Omega Protocol Automarkers").getComponent();
         outer.add(TBDMarkers, BorderLayout.NORTH);
         GridBagConstraints c = new GridBagConstraints(0, 0, 2, 1, 1, 0, GridBagConstraints.NORTHWEST, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0);
 
@@ -42,31 +42,34 @@ public class TBDUltimateGUI implements DutyPluginTab {
         inner.setLayout(new GridBagLayout());
         innerDummyMechanic = new JPanel();
         innerDummyMechanic.setLayout(new GridBagLayout());
-        JCheckBox useSomeMechanic = new BooleanSettingGui(tbdUltimate.getUseSomeMechanic(), "Use 'Some mechanic' markers").getComponent();
+        JCheckBox useSomeMechanic = new BooleanSettingGui(omegaProtocol.getUseSomeMechanic(), "Use 'Some mechanic' markers").getComponent();
         ReadOnlyText text = new ReadOnlyText("""
                 Here I would explain what each checkbox does, but the fight isnt out yet so I don't even know
                 """);
 
         inner.add(useSomeMechanic, c);
+        c.gridy++;
+        c.weighty++;
+        inner.add(text, c);
 
-        tbdUltimate.getUseAutomarks().addAndRunListener(this::checkVis);
-        tbdUltimate.getUseSomeMechanic().addAndRunListener(this::checkSMVis);
+        omegaProtocol.getUseAutomarks().addAndRunListener(this::checkVis);
+        omegaProtocol.getUseSomeMechanic().addAndRunListener(this::checkSMVis);
         outer.add(inner, BorderLayout.CENTER);
         return outer;
     }
 
     @Override
     public KnownDuty getDuty() {
-        return KnownDuty.None;
+        return KnownDuty.OMEGA_PROTOCOL;
     }
 
     private void checkVis() {
-        boolean enabled = tbdUltimate.getUseAutomarks().get();
+        boolean enabled = omegaProtocol.getUseAutomarks().get();
         inner.setVisible(enabled);
     }
 
     private void checkSMVis() {
-        boolean enabled = tbdUltimate.getUseSomeMechanic().get();
+        boolean enabled = omegaProtocol.getUseSomeMechanic().get();
         innerDummyMechanic.setVisible(enabled);
     }
 }

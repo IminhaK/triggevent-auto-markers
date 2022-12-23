@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@CalloutRepo(name = "P8S Automarkers", duty = KnownDuty.P8S)
+@CalloutRepo(name = "Iminha's P8S", duty = KnownDuty.P8S)
 public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(P8SAutoMarkers.class);
@@ -91,7 +91,8 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
 
     @HandleEvents
     public void reset(EventContext context, DutyRecommenceEvent drce) {
-        context.accept(new ClearAutoMarkRequest());
+        if(useAutoMarks.get())
+            context.accept(new ClearAutoMarkRequest());
     }
 
     @AutoFeed

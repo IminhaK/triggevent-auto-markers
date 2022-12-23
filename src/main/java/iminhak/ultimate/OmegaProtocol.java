@@ -21,21 +21,21 @@ import gg.xp.xivsupport.persistence.settings.BooleanSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@CalloutRepo(name = "TBD Ultimate Automarkers", duty = KnownDuty.TBD_Ultimate)
-public class TBDUltimate extends AutoChildEventHandler implements FilteredEventHandler {
+@CalloutRepo(name = "Iminha's Omega Protocol", duty = KnownDuty.OMEGA_PROTOCOL)
+public class OmegaProtocol extends AutoChildEventHandler implements FilteredEventHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(TBDUltimate.class);
+    private static final Logger log = LoggerFactory.getLogger(OmegaProtocol.class);
 
     private final BooleanSetting useAutomarks;
 
     private final BooleanSetting useSomeMechanic;
 
-    public TBDUltimate(XivState state, StatusEffectRepository buffs, PersistenceProvider pers) {
+    public OmegaProtocol(XivState state, StatusEffectRepository buffs, PersistenceProvider pers) {
         this.state = state;
         this.buffs = buffs;
-        this.useAutomarks = new BooleanSetting(pers, "triggers.tbd.use-auto-markers", false);
+        this.useAutomarks = new BooleanSetting(pers, "triggers.top.use-auto-markers", false);
 
-        this.useSomeMechanic = new BooleanSetting(pers, "triggers.tbd.use-something", false);
+        this.useSomeMechanic = new BooleanSetting(pers, "triggers.top.use-something", false);
     }
 
     private final XivState state;

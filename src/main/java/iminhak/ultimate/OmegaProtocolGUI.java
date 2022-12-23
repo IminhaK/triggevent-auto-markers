@@ -42,7 +42,7 @@ public class OmegaProtocolGUI implements DutyPluginTab {
         inner.setLayout(new GridBagLayout());
         innerDummyMechanic = new JPanel();
         innerDummyMechanic.setLayout(new GridBagLayout());
-        JCheckBox useSomeMechanic = new BooleanSettingGui(omegaProtocol.getUseSomeMechanic(), "Use 'Some mechanic' markers").getComponent();
+        JCheckBox useSomeMechanic = new BooleanSettingGui(omegaProtocol.getUseCircleProgram(), "Use 'Some mechanic' markers").getComponent();
         ReadOnlyText text = new ReadOnlyText("""
                 Here I would explain what each checkbox does, but the fight isnt out yet so I don't even know
                 """);
@@ -53,7 +53,7 @@ public class OmegaProtocolGUI implements DutyPluginTab {
         inner.add(text, c);
 
         omegaProtocol.getUseAutomarks().addAndRunListener(this::checkVis);
-        omegaProtocol.getUseSomeMechanic().addAndRunListener(this::checkSMVis);
+        omegaProtocol.getUseCircleProgram().addAndRunListener(this::checkSMVis);
         outer.add(inner, BorderLayout.CENTER);
         return outer;
     }
@@ -69,7 +69,7 @@ public class OmegaProtocolGUI implements DutyPluginTab {
     }
 
     private void checkSMVis() {
-        boolean enabled = omegaProtocol.getUseSomeMechanic().get();
+        boolean enabled = omegaProtocol.getUseCircleProgram().get();
         innerDummyMechanic.setVisible(enabled);
     }
 }

@@ -40,8 +40,8 @@ public class O11S extends AutoChildEventHandler implements FilteredEventHandler 
     private final ModifiableCallout<AbilityCastStart> peripheralYellow = ModifiableCallout.durationBasedCall("Peripheral Synthesis: Yellow", "Yellow on you");
     private final ModifiableCallout<AbilityCastStart> peripheralBlue = ModifiableCallout.durationBasedCall("Peripheral Synthesis: Blue", "Blue on you");
     private final ModifiableCallout<AbilityCastStart> mustardBomb = ModifiableCallout.durationBasedCall("Mustard Bomb", "Buster on {event.target}");
-    private final ModifiableCallout<AbilityCastStart> ferroPull = ModifiableCallout.durationBasedCall("Ferro same polarity", "Same, get pushed");
-    private final ModifiableCallout<AbilityCastStart> ferroPush = ModifiableCallout.durationBasedCall("Ferro different polarity", "Different, get pulled");
+    private final ModifiableCallout<AbilityCastStart> ferroPush = ModifiableCallout.durationBasedCall("Ferro same polarity", "Same, get close");
+    private final ModifiableCallout<AbilityCastStart> ferroPull = ModifiableCallout.durationBasedCall("Ferro different polarity", "Different, go far");
     private final ModifiableCallout<AbilityCastStart> executable2start = ModifiableCallout.durationBasedCall("Executable 2: Start", "Bait tether or move east");
     private final ModifiableCallout<AbilityCastStart> executable2Chain = ModifiableCallout.durationBasedCall("Executable 2: Chains of Memory", "Chain on YOU");
     private final ModifiableCallout<AbilityCastStart> executable2Looper = ModifiableCallout.durationBasedCall("Executable 2: Looper", "Looper, {duration} seconds");
@@ -132,7 +132,7 @@ public class O11S extends AutoChildEventHandler implements FilteredEventHandler 
         int id = (int) event.getMarkerId();
         final ModifiableCallout<HeadMarkerEvent> call;
         switch(id) {
-            case 0x0 -> call = waveCannonKyrios;
+            case 0x16 -> call = waveCannonKyrios;
             default -> {
                 return;
             }
@@ -218,14 +218,14 @@ public class O11S extends AutoChildEventHandler implements FilteredEventHandler 
     private void peripheral2(AbilityCastStart e1, SequentialTriggerController<BaseEvent> s) {
         s.accept(peripheralSynthesis2.getModified());
 
-        s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(0x6A7));
+        s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(0x6A7) && ba.getTarget().isThePlayer());
         s.accept(biohacked.getModified());
     }
 
     private void peripheral3(AbilityCastStart e1, SequentialTriggerController<BaseEvent> s) {
         s.accept(peripheralSynthesis2.getModified());
 
-        s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(0x6A7));
+        s.waitEvent(BuffApplied.class, ba -> ba.buffIdMatches(0x6A7) && ba.getTarget().isThePlayer());
         s.accept(biohacked.getModified());
 
         s.waitEvent(AbilityUsedEvent.class, aue -> aue.abilityIdMatches(0x3250));
@@ -344,7 +344,7 @@ public class O11S extends AutoChildEventHandler implements FilteredEventHandler 
     private void pantokrator1(AbilityCastStart e1, SequentialTriggerController<BaseEvent> s) {
         s.accept(pantokrator.getModified());
         log.info("Pantokrator 1: Start bait loop");
-        for(int i = 1; i <= 5; i++) {
+        for(int i = 1; i <= 4; i++) {
             log.info("Pantokrator 1: Waiting for puddle {}", i);
             s.waitEvent(AbilityCastStart.class, acs -> acs.abilityIdMatches(0x370B));
             s.waitMs(100);

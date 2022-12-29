@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-@CalloutRepo(name = "Iminha's Omega Protocol", duty = KnownDuty.OMEGA_PROTOCOL)
+@CalloutRepo(name = "Iminha's Omega Protocol", duty = KnownDuty.None)
 public class OmegaProtocol extends AutoChildEventHandler implements FilteredEventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OmegaProtocol.class);

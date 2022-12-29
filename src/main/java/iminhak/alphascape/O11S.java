@@ -16,7 +16,6 @@ import gg.xp.xivsupport.events.triggers.seq.SequentialTrigger;
 import gg.xp.xivsupport.events.triggers.seq.SequentialTriggerController;
 import gg.xp.xivsupport.events.triggers.seq.SqtTemplates;
 import gg.xp.xivsupport.models.XivCombatant;
-import org.codehaus.groovy.ast.MethodNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

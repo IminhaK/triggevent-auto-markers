@@ -128,6 +128,8 @@ public class O11S extends AutoChildEventHandler implements FilteredEventHandler 
 
     @HandleEvents
     public void headMarker(EventContext context, HeadMarkerEvent event) {
+        if(!event.getTarget().isThePlayer())
+            return;
         int id = (int) event.getMarkerId();
         final ModifiableCallout<HeadMarkerEvent> call;
         switch(id) {

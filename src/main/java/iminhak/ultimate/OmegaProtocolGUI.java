@@ -60,7 +60,7 @@ public class OmegaProtocolGUI implements DutyPluginTab {
 
     @Override
     public KnownDuty getDuty() {
-        return KnownDuty.OMEGA_PROTOCOL;
+        return KnownDuty.None;
     }
 
     private void checkVis() {

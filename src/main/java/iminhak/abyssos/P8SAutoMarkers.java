@@ -89,10 +89,14 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
         return state.dutyIs(KnownDuty.P8S);
     }
 
+    private boolean autoMarking = false;
+
     @HandleEvents
     public void reset(EventContext context, DutyRecommenceEvent drce) {
-        if(useAutoMarks.get())
+        if(useAutoMarks.get() && autoMarking) {
             context.accept(new ClearAutoMarkRequest());
+            autoMarking = false;
+        }
     }
 
     @AutoFeed
@@ -100,6 +104,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
             acs -> acs.abilityIdMatches(0x75ED),
             (e1, s) -> {
                 if(getUseAutomarks().get() && getUseLimitlessDesolation().get()) {
+                    autoMarking = true;
                     log.info("Limitless Desolation markers are enabled");
                     for (int i = 1; i <= 4; i++) {
                         boolean inverse = getLDSupportAttack().get();
@@ -207,6 +212,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
 
     private void hc1(AbilityCastStart e1, SequentialTriggerController<BaseEvent> s) {
         if(getUseAutomarks().get() && getUseHC1().get()) {
+            autoMarking = true;
             List<BuffApplied> buffs = s.waitEvents(8, BuffApplied.class, ba -> ba.buffIdMatches(impAlpha, impBeta, impGamma, supersplice, multisplice));
             //make sure its only players
             buffs = buffs.stream().filter(ba -> {
@@ -346,6 +352,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
 
     private void hc2(AbilityCastStart e1, SequentialTriggerController<BaseEvent> s) {
         if(getUseAutomarks().get() && getUseHC2().get()) {
+            autoMarking = true;
             List<BuffApplied> buffs = s.waitEvents(8, BuffApplied.class, ba -> ba.buffIdMatches(impAlpha, impBeta, impGamma, solosplice, multisplice));
             //make sure its only players
             buffs = buffs.stream().filter(ba -> {
@@ -418,6 +425,7 @@ public class P8SAutoMarkers extends AutoChildEventHandler implements FilteredEve
             acs -> acs.abilityIdMatches(31193),
             (e1, s) -> {
                 if (getUseAutomarks().get() && getUseDominion().get()) {
+                    autoMarking = true;
                     List<AbilityUsedEvent> hits = s.waitEventsQuickSuccession(4, AbilityUsedEvent.class, aue -> aue.abilityIdMatches(31195) && aue.isFirstTarget(), Duration.ofMillis(100));
                     List<XivPlayerCharacter> firstSet = new ArrayList<>(getState().getPartyList());
                     List<XivPlayerCharacter> secondSet = hits.stream()

@@ -32,22 +32,16 @@ public class OmegaProtocol extends AutoChildEventHandler implements FilteredEven
 
     private static final Logger log = LoggerFactory.getLogger(OmegaProtocol.class);
 
+    private boolean autoMarking = false;
+
     private final BooleanSetting useAutomarks;
 
     private final BooleanSetting useCircleProgram;
-
-    //Phase 1: Omega
-    private final ModifiableCallout<BuffApplied> circleProgram_mustard1 = new ModifiableCallout<BuffApplied>("Circle program: First  Mustard", "One, take tether").autoIcon();
-    private final ModifiableCallout<BuffApplied> circleProgram_mustard2 = new ModifiableCallout<BuffApplied>("Circle program: Second  Mustard", "Two, tether later").autoIcon();
-    private final ModifiableCallout<BuffApplied> circleProgram_patch1 = new ModifiableCallout<BuffApplied>("Circle program: First  Patch", "One, take tower").autoIcon();
-    private final ModifiableCallout<BuffApplied> circleProgram_patch2 = new ModifiableCallout<BuffApplied>("Circle Program: Second  Patch", "Two, tower later").autoIcon();
-    private final ModifiableCallout<AbilityCastStart> circleProgram_takeMustard = new ModifiableCallout<AbilityCastStart>("Circle Program: Take tether", "Take tether");
 
     public OmegaProtocol(XivState state, StatusEffectRepository buffs, PersistenceProvider pers) {
         this.state = state;
         this.buffs = buffs;
         this.useAutomarks = new BooleanSetting(pers, "triggers.top.use-auto-markers", false);
-
         this.useCircleProgram = new BooleanSetting(pers, "triggers.top.use-something", false);
     }
 
@@ -69,7 +63,10 @@ public class OmegaProtocol extends AutoChildEventHandler implements FilteredEven
 
     @HandleEvents
     public void reset(EventContext context, DutyRecommenceEvent drce) {
-        context.accept(new ClearAutoMarkRequest());
+        if(autoMarking) {
+            context.accept(new ClearAutoMarkRequest());
+            autoMarking = false;
+        }
     }
 
     private final Predicate<BuffApplied> circleProgramNumber = ba -> {
@@ -81,23 +78,18 @@ public class OmegaProtocol extends AutoChildEventHandler implements FilteredEven
     private final SequentialTrigger<BaseEvent> circleProgram = SqtTemplates.sq(60_000, AbilityCastStart.class,
             acs -> acs.abilityIdMatches(0x0), //TODO: Insert correct ID for Circle Program cast
             (e1, s) -> {
-                Boolean useThisAM = getUseCircleProgram().get() && getUseAutomarks().get();
-                log.info("Circle Program: start");
-                List<BuffApplied> lineDebuffs = s.waitEvents(8, BuffApplied.class, circleProgramNumber); //TODO: Confirm number of line debuffs applied
-                Optional<BuffApplied> lineDebuffOnPlayer = lineDebuffs.stream().filter(ba -> ba.getTarget().isThePlayer()).findFirst();
-                if(lineDebuffOnPlayer.isPresent()) {
-                    int linePos = (int) lineDebuffOnPlayer.get().getBuff().getId() - 0x0 + 1; //TODO: Insert line buff offset (first buff minus one)
-                    boolean inTower = getBuffs().getBuffs().stream().anyMatch(ba -> ba.getBuff().getId() == 0x0 && ba.getTarget().isThePlayer()); //TODO: Get Patch ID
-                    switch(linePos) {
-                        case 1 -> s.accept(inTower ? circleProgram_patch1.getModified() : circleProgram_mustard1.getModified());
-                        case 2 -> s.accept(inTower ? circleProgram_patch2.getModified() : circleProgram_mustard2.getModified());
-                    }
+                if(getUseCircleProgram().get() && getUseAutomarks().get()) {
+                    autoMarking = true;
+                    log.info("Circle Program: start");
+                    List<BuffApplied> lineDebuffs = s.waitEvents(8, BuffApplied.class, circleProgramNumber); //TODO: Confirm number of line debuffs applied
+                    Optional<BuffApplied> lineDebuffOnPlayer = lineDebuffs.stream().filter(ba -> ba.getTarget().isThePlayer()).findFirst();
+                    if (lineDebuffOnPlayer.isPresent()) {
+                        int linePos = (int) lineDebuffOnPlayer.get().getBuff().getId() - 0x0 + 1; //TODO: Insert line buff offset (first buff minus one)
+                        boolean inTower = getBuffs().getBuffs().stream().anyMatch(ba -> ba.getBuff().getId() == 0x0 && ba.getTarget().isThePlayer()); //TODO: Get Patch ID
 
-                    s.waitEvent(AbilityCastStart.class, acs -> acs.abilityIdMatches(0x0)); //TODO: Mustard bomb cast ID
+                        s.waitEvent(AbilityCastStart.class, acs -> acs.abilityIdMatches(0x0)); //TODO: Mustard bomb cast ID
 
-                    //TODO: If only 4 line debuffs, create prio for who takes first/second mustards
-                    if(!inTower) {
-                        s.accept(circleProgram_takeMustard.getModified());
+                        //TODO: If only 4 line debuffs, create prio for who takes first/second mustards
                     }
                 }
             });

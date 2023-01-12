@@ -53,7 +53,7 @@ public class P8SAutoMarkersGUI implements DutyPluginTab {
         JCheckBox useHC2 = new BooleanSettingGui(p8s.getUseHC2(), "Use HC2 markers").getComponent();
         JCheckBox useDominion = new BooleanSettingGui(p8s.getUseDominion(), "Use Dominion markers").getComponent();
         //Thank you Angel kill on discord for the translation!
-        ReadOnlyText text = Locale.getDefault() == Locale.JAPANESE ? new ReadOnlyText("""
+        ReadOnlyText text = Locale.getDefault() == Locale.JAPANESE || Locale.getDefault() == Locale.JAPAN || Locale.getDefault().getDisplayLanguage().equals("ja_JP") ? new ReadOnlyText("""
                 トリガーイベント  零式 煉獄編4層   後半自動マーカー
                                 
                 P8SAutomarkers
@@ -95,8 +95,7 @@ public class P8SAutoMarkersGUI implements DutyPluginTab {
                 
                 Dominion markers will mark players soaking the first set of towers as Attack 1-4 and mark the second set of players as Bind 1-3 and Square, and then swap the Attack markers to the second set of players after the first set of towers goes off.
                 Dominion markers use the priority from base Triggevent's Dominion prio, click below to be taken there:
-                Hello! Below is your current locale! for testing purposes...
-                """ + Locale.getDefault());
+                """);
         JButton domPrio = new JButton("Dominion Priority");
         domPrio.addActionListener(l -> reg.activateItem(P8S2DominionPrioGui.class));
 

@@ -95,7 +95,8 @@ public class P8SAutoMarkersGUI implements DutyPluginTab {
                 
                 Dominion markers will mark players soaking the first set of towers as Attack 1-4 and mark the second set of players as Bind 1-3 and Square, and then swap the Attack markers to the second set of players after the first set of towers goes off.
                 Dominion markers use the priority from base Triggevent's Dominion prio, click below to be taken there:
-                """);
+                Hello! Below is your current locale! for testing purposes...
+                """ + Locale.getDefault());
         JButton domPrio = new JButton("Dominion Priority");
         domPrio.addActionListener(l -> reg.activateItem(P8S2DominionPrioGui.class));
 

@@ -11,6 +11,7 @@ import gg.xp.xivsupport.persistence.gui.BooleanSettingGui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Locale;
 
 @ScanMe
 public class P8SAutoMarkersGUI implements DutyPluginTab {
@@ -51,7 +52,39 @@ public class P8SAutoMarkersGUI implements DutyPluginTab {
         JCheckBox useHC1 = new BooleanSettingGui(p8s.getUseHC1(), "Use HC1 markers").getComponent();
         JCheckBox useHC2 = new BooleanSettingGui(p8s.getUseHC2(), "Use HC2 markers").getComponent();
         JCheckBox useDominion = new BooleanSettingGui(p8s.getUseDominion(), "Use Dominion markers").getComponent();
-        ReadOnlyText text = new ReadOnlyText("""
+        //Thank you Angel kill on discord for the translation!
+        ReadOnlyText text = Locale.getDefault().getDisplayLanguage().equals("jp") ? new ReadOnlyText("""
+                トリガーイベント  零式 煉獄編4層   後半自動マーカー
+                                
+                P8SAutomarkers
+                Limited Desolationマーカーを使用する
+                                 ┗逆の役割
+                HC1マーカーを使用する
+                HC2マーカーを使用する
+                                
+                ドミニオンマーカーを使用する
+                DPSプレーヤーを攻撃1-4マーカーでマークし、
+                最初の餌としてバインド1-3を使用するプレーヤーをサポートします。
+                逆の役割は、
+                代わりに攻撃マーカーを追加します。サポート
+                                
+                HC1マーカーは、攻撃1と2を混合する必要があるプレーヤーを表示し、
+                スーパースプライスとマルチスプライスプレーヤーをバインド1-3で表示して、
+                どのデバフを浸す必要があるかを示します（アルファ1、ベータ2、ガンマ3）。\s
+                第2セットのタワーでは、2人のプレーヤーが攻撃1&42とマークされ、残りの2人は無視1&2とマークされます。
+                                
+                HC2マーカーは、noデバフプレーヤーにIgnore1と2をマークし、
+                次に攻撃1と2で最初に混合プレーヤーをマークします。\s
+                2回目のデバフの後、
+                Bind1と2で長いAlphaとBetaをマークし、Squareでガンマと未使用のShortをTriangleでマークします。
+                                
+                ドミニオンマーカーは、
+                最初のタワーセットを攻撃1-4に浸したプレーヤーをマークし、
+                2番目のプレーヤーセットをバインド1-3とスクウェアにマークし、
+                最初のタワーセットが消えた後、
+                攻撃マーカーを2番目のプレーヤーセットにスワップします。\s
+                Dominionマーカーは、ベースTriggeventのDominionプリセットの優先順位を使用します。
+                """) : new ReadOnlyText("""
                 Limitless Desolation markers will mark DPS players with Attack 1-4 markers and support players with Bind 1-3 for the first third baits, then a square for the fourth.
                 - Inverse roles will instead put the Attack markers on supports
                 

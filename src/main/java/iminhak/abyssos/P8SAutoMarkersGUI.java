@@ -53,7 +53,7 @@ public class P8SAutoMarkersGUI implements DutyPluginTab {
         JCheckBox useHC2 = new BooleanSettingGui(p8s.getUseHC2(), "Use HC2 markers").getComponent();
         JCheckBox useDominion = new BooleanSettingGui(p8s.getUseDominion(), "Use Dominion markers").getComponent();
         //Thank you Angel kill on discord for the translation!
-        ReadOnlyText text = Locale.getDefault().getDisplayLanguage().equals("jp") ? new ReadOnlyText("""
+        ReadOnlyText text = Locale.getDefault() == Locale.JAPANESE ? new ReadOnlyText("""
                 トリガーイベント  零式 煉獄編4層   後半自動マーカー
                                 
                 P8SAutomarkers

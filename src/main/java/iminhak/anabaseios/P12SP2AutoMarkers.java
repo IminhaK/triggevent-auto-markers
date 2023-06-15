@@ -5,16 +5,19 @@ import gg.xp.reevent.events.EventContext;
 import gg.xp.reevent.scan.AutoChildEventHandler;
 import gg.xp.reevent.scan.AutoFeed;
 import gg.xp.reevent.scan.FilteredEventHandler;
+import gg.xp.reevent.scan.HandleEvents;
 import gg.xp.xivdata.data.duties.KnownDuty;
 import gg.xp.xivsupport.callouts.CalloutRepo;
 import gg.xp.xivsupport.events.actlines.events.AbilityCastStart;
 import gg.xp.xivsupport.events.actlines.events.AbilityUsedEvent;
 import gg.xp.xivsupport.events.actlines.events.BuffApplied;
+import gg.xp.xivsupport.events.actlines.events.actorcontrol.DutyRecommenceEvent;
 import gg.xp.xivsupport.events.state.XivState;
 import gg.xp.xivsupport.events.state.combatstate.StatusEffectRepository;
 import gg.xp.xivsupport.events.triggers.marks.ClearAutoMarkRequest;
 import gg.xp.xivsupport.events.triggers.marks.adv.MarkerSign;
 import gg.xp.xivsupport.events.triggers.marks.adv.MultiSlotAutoMarkHandler;
+import gg.xp.xivsupport.events.triggers.marks.adv.SpecificAutoMarkRequest;
 import gg.xp.xivsupport.events.triggers.seq.SequentialTrigger;
 import gg.xp.xivsupport.events.triggers.seq.SqtTemplates;
 import gg.xp.xivsupport.models.XivCombatant;
@@ -57,6 +60,26 @@ public class P12SP2AutoMarkers extends AutoChildEventHandler implements Filtered
                 PangenesisAssignment.ShortLight, MarkerSign.TRIANGLE,
                 PangenesisAssignment.LongLight, MarkerSign.SQUARE
         ));
+    }
+
+    private volatile boolean amActive;
+
+    @HandleEvents
+    public void checkAm(EventContext context, SpecificAutoMarkRequest samr) {
+        amActive = true;
+    }
+
+    @HandleEvents
+    public void clearedAm(EventContext context, ClearAutoMarkRequest camr) {
+        amActive = false;
+    }
+
+    @HandleEvents
+    public void clearAm(EventContext context, DutyRecommenceEvent event) {
+        if (amActive) {
+            context.accept(new ClearAutoMarkRequest());
+            amActive = false;
+        }
     }
 
     @AutoFeed

@@ -83,7 +83,7 @@ public class P12SP2AutoMarkers extends AutoChildEventHandler implements Filtered
     }
 
     @AutoFeed
-    private final SequentialTrigger<BaseEvent> pangenesisAm = SqtTemplates.sq(30_000,
+    private final SequentialTrigger<BaseEvent> pangenesisAm = SqtTemplates.sq(60_000,
             AbilityCastStart.class, acs -> acs.abilityIdMatches(0x833F),
             (e1, s) -> {
                 if(getPangenesisAmEnable().get()) {

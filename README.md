@@ -12,3 +12,5 @@ Pandaemonium:
     - High Concept 1 & 2
     - Limitless Desolation
     - Dominion
+- P12Sp2
+    - Pangenesis

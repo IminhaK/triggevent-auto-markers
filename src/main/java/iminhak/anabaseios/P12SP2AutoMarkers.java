@@ -2,14 +2,9 @@ package iminhak.anabaseios;
 
 import gg.xp.reevent.events.BaseEvent;
 import gg.xp.reevent.events.EventContext;
-import gg.xp.reevent.scan.AutoChildEventHandler;
-import gg.xp.reevent.scan.AutoFeed;
-import gg.xp.reevent.scan.FilteredEventHandler;
-import gg.xp.reevent.scan.HandleEvents;
+import gg.xp.reevent.scan.*;
 import gg.xp.xivdata.data.duties.KnownDuty;
-import gg.xp.xivsupport.callouts.CalloutRepo;
 import gg.xp.xivsupport.events.actlines.events.AbilityCastStart;
-import gg.xp.xivsupport.events.actlines.events.AbilityUsedEvent;
 import gg.xp.xivsupport.events.actlines.events.BuffApplied;
 import gg.xp.xivsupport.events.actlines.events.actorcontrol.DutyRecommenceEvent;
 import gg.xp.xivsupport.events.state.XivState;
@@ -28,17 +23,14 @@ import gg.xp.xivsupport.persistence.settings.BooleanSetting;
 import gg.xp.xivsupport.persistence.settings.JobSortOverrideSetting;
 import gg.xp.xivsupport.persistence.settings.JobSortSetting;
 import gg.xp.xivsupport.persistence.settings.MultiSlotAutomarkSetting;
-import org.apache.commons.lang3.mutable.Mutable;
-import org.apache.commons.lang3.mutable.MutableObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@CalloutRepo(name = "Iminha's P12S", duty = KnownDuty.P12S)
+@ScanMe
 public class P12SP2AutoMarkers extends AutoChildEventHandler implements FilteredEventHandler {
 
     private static final Logger log = LoggerFactory.getLogger(P12SP2AutoMarkers.class);

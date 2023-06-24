@@ -23,11 +23,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class P12SP2AutoMarkersGUI implements DutyPluginTab {
 
     private final P12SP2AutoMarkers backend;
+    private final P12SP1Stuff P12SP1;
     private final List<Runnable> toRefresh = new CopyOnWriteArrayList<>();
     private JobSortGui jsg;
 
-    public P12SP2AutoMarkersGUI(P12SP2AutoMarkers backend) {
+    public P12SP2AutoMarkersGUI(P12SP2AutoMarkers backend, P12SP1Stuff P12SP1) {
         this.backend = backend;
+        this.P12SP1 = P12SP1;
     }
 
     @Override
@@ -78,6 +80,22 @@ public class P12SP2AutoMarkersGUI implements DutyPluginTab {
             MultiSlotAutomarkSetting<PangenesisAssignment> markSettings = backend.getPangenesisAMSettings();
             BasicAutomarkSettingGroupGui<PangenesisAssignment> pangenesisSettings = new BasicAutomarkSettingGroupGui<>("Pangenesis", markSettings, 4, true);
             tabs.addTab("Pangenesis", makeAmPanel(new BooleanSettingHidingPanel(backend.getPangenesisAmEnable(), "Pangenesis Automark", pangenesisSettings, true), backend.getPangenesisPrio()));
+        }
+        {
+            JPanel additionalToolsTab = new JPanel(new BorderLayout());
+            ReadOnlyText lcEchoHelptext = new ReadOnlyText("""
+                    Writes to chat every players name and which headmarker they got for limitcut.
+                    Helpful for quick post-pull discussion without a VOD to review.
+                    Requires Telesto.
+                    """);
+            BooleanSettingHidingPanel additionalToolsPanel = new BooleanSettingHidingPanel(P12SP1.getLcEchoEnable(), "LC Echo markers", lcEchoHelptext, true);
+            int thisHEIGHT = 250;
+            additionalToolsPanel.setPreferredSize(new Dimension(32767, thisHEIGHT));
+            additionalToolsPanel.setMinimumSize(new Dimension(1, thisHEIGHT));
+            additionalToolsPanel.setMinimumSize(new Dimension(32767, thisHEIGHT));
+            additionalToolsTab.add(additionalToolsPanel, BorderLayout.NORTH);
+            additionalToolsTab.revalidate();
+            tabs.addTab("Addl. Tools", additionalToolsTab);
         }
         outer.add(tabs, BorderLayout.CENTER);
         outer.add(helpText, BorderLayout.NORTH);

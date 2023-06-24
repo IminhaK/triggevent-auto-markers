@@ -12,5 +12,9 @@ Pandaemonium:
     - High Concept 1 & 2
     - Limitless Desolation
     - Dominion
-- P12Sp2
+- P12SP2
     - Pangenesis
+
+## Additional Tools
+- P12SP1
+  - Output LC numbers into chat
